@@ -1,5 +1,6 @@
 .data
-  vetor: .word      10 5 1 3 50 10 100 0
+  vetor: .word      10 5 1 3 50 10 100 11 7 6 9 20 15 19 131 4 
+         .word      2 19 18 17 12 0  
   tamanho: .asciiz  "Tamanho do vetor é de: "
   print: .asciiz    "\n"
   espaco: .asciiz    "\t"
@@ -9,8 +10,8 @@
 
 .text
 main:
-  la    $s5, vetor         # s1 ponteiro vetor
-  
+  la $s5, vetor  
+
   jal sizeVector
 
   jal buble
@@ -38,11 +39,29 @@ mainLoop:
     
     blt $t3, $t4, swap
 
+  addLoop:
     addi $s1, $s1, 1
+    j auxLoop
 
     swap: 
       sw $t3, ($t2)
       sw $t4, ($t1)
+      li $v0, 4
+      la $a0, maior
+      syscall
+      li $v0, 1
+      la $a0, 0($t1)
+      syscall
+      li $v0, 4
+      la $a0, print
+      syscall
+      li $v0, 1
+      la $a0, 0($t2)
+      syscall
+      j addLoop
+      
+      
+      
   endMainLoop:
     addi $s0, $s0, 1
     j mainLoop
@@ -52,17 +71,21 @@ mainLoop:
 
 
 sizeVector:
- 	addi  $sp,  $sp, -4
-  sw    $ra,  0($sp)
+ 	addi  $sp,  $sp, -8
+  sw    $s5,  0($sp)
+  sw    $ra,  4($sp)
   whileVector:
     lw    $t9,  0($s5)
-    beq   $t9,  $0, printSize
+    beq   $t9,  $0, callPrintSize
     addi  $t0,  $t0, 1
     addi  $s5,  $s5, 4
     j   whileVector
-  # lembra ultimo caminho
-  lw    $ra,  0($sp)
-  jr    $ra
+  callPrintSize:
+    jal printSize
+    # lembra ultimo caminho
+    lw    $ra,  4($sp)
+    lw    $s5,  0($sp)
+    jr    $ra
 
 printSize:
   la $a0, tamanho
